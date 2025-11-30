@@ -1,0 +1,74 @@
+//---------------------------------------------------
+
+IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/
+
+NUMBER: /-?[0-9]+(\.[0-9]+)?/
+
+STRING: /"([^"\\]|\\.)*"/
+CHAR: /'([^'\\]|\\.)'/
+
+ARITH_OP: "+" | "-" | "*" | "/" | "%"
+COMPARISON_OP: "==" | "!=" | "<=" | ">=" | "<" | ">"
+LOGICAL_OP: "&&" | "||" | "!"
+
+ASSIGN_OP: "=" 
+         | "+=" | "-=" | "*=" | "/=" | "%=" 
+         | "&=" | "|=" | "^=" 
+         | "<<=" | ">>="
+
+INC_OP: "++"
+DEC_OP: "--"
+
+LPAR: "("
+RPAR: ")"
+LBRACE: "{"
+RBRACE: "}"
+LBRACK: "["
+RBRACK: "]"
+SEMI: ";"
+COMMA: ","
+
+COMMENT: /\/\/[^\n]*/
+MULTILINE_COMMENT: "/*" /(.|[\r\n])*?/ "*/"
+
+%ignore COMMENT
+%import common.WS
+%ignore WS
+%ignore MULTILINE_COMMENT
+
+//---------------------------------------------------
+
+start: stmt*                   -> program
+
+?stmt: var_decl
+     | assign_stmt
+     | expr_stmt
+     | if_stmt
+     | block
+
+var_decl: "var" IDENTIFIER (ASSIGN_OP expr)? SEMI  -> var_declaration
+
+assign_stmt: IDENTIFIER ASSIGN_OP expr SEMI        -> assign
+
+expr_stmt: expr SEMI                                -> expr_statement
+
+if_stmt: "if" LPAR expr RPAR stmt ("else" stmt)?    -> if_statement
+
+block: LBRACE stmt* RBRACE                          -> block
+
+?expr: expr LOGICAL_OP expr      -> logical_op
+     | expr COMPARISON_OP expr   -> comparison_op
+     | expr ARITH_OP expr        -> arithmetic_op
+     | unary_expr
+     | atom
+
+unary_expr: (LOGICAL_OP | "-" | INC_OP | DEC_OP) expr -> unary_op
+
+?atom: NUMBER                            -> number
+     | STRING                            -> string
+     | CHAR                              -> char
+     | IDENTIFIER                        -> variable
+     | IDENTIFIER LPAR (arg_list)? RPAR  -> func_call
+     | LPAR expr RPAR                    -> parentheses
+
+arg_list: expr (COMMA expr)*
