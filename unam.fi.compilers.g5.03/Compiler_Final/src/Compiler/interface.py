@@ -21,7 +21,7 @@ FUENTE_CODIGO = ("Consolas", 11)
 class CompiladorGUI(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Compilador - Equipo 8")
+        self.title("Compilador - Equipo 3")
         self.geometry("900x700")
         self.configure(bg=COLOR_FONDO_APP)
         
